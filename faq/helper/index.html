@@ -1,0 +1,50 @@
+<!doctype html><html lang=en-US><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="When the optional Windows helper is needed and what its driver does."><title>About the Windows helper | Sho Metrics</title><link rel=canonical href=https://shometrics.github.io/faq/helper/><meta property="og:type" content="website"><meta property="og:site_name" content="Sho Metrics"><meta property="og:title" content="About the Windows helper"><meta property="og:description" content="When the optional Windows helper is needed and what its driver does."><meta property="og:url" content="https://shometrics.github.io/faq/helper/"><meta property="og:image" content="https://shometrics.github.io/og-image.png"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="About the Windows helper"><meta name=twitter:description content="When the optional Windows helper is needed and what its driver does."><meta name=twitter:image content="https://shometrics.github.io/og-image.png"><link rel=icon href=../../favicon.ico sizes=32x32><link rel=icon href=../../favicon.svg type=image/svg+xml><link rel=apple-touch-icon href=../../apple-touch-icon.png><link rel=stylesheet href=../../css/site.css></head><body><a class=skip-link href=#main>Skip to content</a><header class=site-header><nav class=site-nav aria-label="Main navigation"><a class=brand href=../../ aria-label="ShoMetrics home"><img class="brand-mark mark-on-light" src=../../favicon.svg alt width=30 height=30>
+<img class="brand-mark mark-on-dark" src=../../logo-mark-dark.svg alt width=30 height=30>
+ShoMetrics
+</a><input class=nav-toggle type=checkbox id=nav-toggle>
+<label class=nav-burger for=nav-toggle aria-label="Toggle navigation menu"><svg class="icon-menu" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+<svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></label><div class=nav-links><a href=../../#start>Get started</a>
+<a href=https://github.com/ShoMetrics/sho_metrics target=_blank rel="noopener noreferrer">GitHub</a>
+<a href=../../faq/>FAQ</a></div></nav></header><main id=main><article class=page-shell><header class=page-header><p class=eyebrow>Sho Metrics</p><h1>About the Windows helper</h1><p>When the optional Windows helper is needed and what its driver does.</p></header><div class=page-content><p>The helper is optional. Most users should start with just the Stream Deck
+plugin and decide later. macOS users do not need the helper at all — it is
+Windows-only.</p><p>Without the helper, the plugin can already show CPU, memory, disk and network
+usage, and on NVIDIA cards: GPU usage, temperature, power, and voltage. That
+covers most Stream Deck keys people set up first.</p><h2 id=install-the-helper-if-you-want>Install the helper if you want</h2><p>Depending on your hardware, the helper can also expose:</p><ul><li>CPU package temperature and power</li><li>motherboard sensors, fan speed, voltage readings</li><li>detailed GPU sensors, especially on non-NVIDIA cards</li><li>other low-level data exposed by
+<a href=https://github.com/LibreHardwareMonitor/LibreHardwareMonitor>LibreHardwareMonitor</a></li></ul><p>The exact list depends on your machine — different CPUs, GPUs, motherboards,
+and sensor chips expose different data, and not every machine reports every
+sensor. You can install the helper later; you do not need to decide during
+your first setup.</p><h2 id=why-a-driver-is-involved>Why a driver is involved</h2><p>Windows does not expose these deeper sensors through standard user-mode APIs.
+Reading them requires a kernel driver. Many Windows system tools use drivers for
+similar reasons, including antivirus tools, game anti-cheat systems, RGB and
+fan-control utilities, and hardware-monitoring apps.</p><p>Installing any driver is still something to do deliberately. The rest of this
+page explains what gets installed and what each part does.</p><h2 id=what-gets-installed>What gets installed</h2><p>The helper sensor stack has two pieces:</p><ul><li>the ShoMetrics Windows helper, a user-mode local service</li><li>the third-party <a href=https://pawnio.eu/>PawnIO</a> driver, used by
+<a href=https://github.com/LibreHardwareMonitor/LibreHardwareMonitor>LibreHardwareMonitor</a>
+inside the helper for low-level sensor access</li></ul><p>ShoMetrics does not require you to install LibreHardwareMonitor separately —
+the helper uses the library directly.</p><p><strong>If you do not already have PawnIO installed, the helper installer installs it
+for you</strong> — you will be asked to accept PawnIO&rsquo;s own agreement during that step.</p><p>If PawnIO is already installed, the helper installer leaves it as is and does not
+reinstall it. To reinstall or update PawnIO, you can do that yourself from
+<a href=https://pawnio.eu/>pawnio.eu</a>.</p><p>You can also choose not to install PawnIO. The helper still runs, but most of the
+sensors it can provide will be unavailable without the driver.</p><p>This step is install-only: removing ShoMetrics later does not remove PawnIO —
+you need to uninstall PawnIO yourself (see <a href=#what-pawnio-is>What PawnIO is</a> below).</p><h2 id=what-pawnio-is>What PawnIO is</h2><p><a href=https://pawnio.eu/>PawnIO</a> is a small, signed Windows driver that hardware
+tools use to read sensors Windows otherwise keeps locked away. The part that
+matters for trust: it only lets a fixed set of <strong>signed modules it trusts</strong> reach
+your hardware — never arbitrary apps or arbitrary code.</p><p>PawnIO is third-party software, and removing ShoMetrics does not remove it —
+<strong>if you would like PawnIO gone, you will need to uninstall it yourself</strong> from
+Windows Settings → Installed apps. ShoMetrics deliberately leaves it in place
+because other popular tools use PawnIO too (for example OpenRGB and some Lian Li
+case-lighting sync apps), and silently pulling a shared driver could break them
+in surprising ways. If you are not sure whether anything else relies on it, a
+safe check is to uninstall PawnIO and watch for anything breaking — if nothing
+does, you are all set.</p><p>Some strict anti-cheat systems, such as FACEIT, have previously misreported
+PawnIO. According to the PawnIO author, the
+<a href=https://github.com/namazso/PawnIO.Setup/issues/1#issuecomment-3893913885>PawnIO.Setup issue</a>
+should be fixed as of 2.1.0. We recommend installing PawnIO only from the
+official site, and using version 2.1.0 or newer.</p><h3 id=if-you-have-read-complaints-about-lhms-old-winring0-driver>If you have read complaints about LHM&rsquo;s old WinRing0 driver</h3><p>Older LibreHardwareMonitor versions shipped a driver called <code>WinRing0</code> that
+had known security concerns (CVE-2020-14979) and is what some users have
+flagged on reviews of other LHM-based tools. ShoMetrics has never used
+WinRing0 — the helper has been built on PawnIO from the first release.</p><h2 id=if-you-do-not-want-the-driver>If you do not want the driver</h2><p>You can simply skip PawnIO. The Stream Deck plugin still works without the
+helper, and the helper still runs without PawnIO — but most of the sensors the
+helper can provide need driver access, so those will be unavailable.</p><h2 id=before-installing>Before installing</h2><ul><li>download the helper from the official ShoMetrics
+<a href=../../download/>download page</a> or release, and download PawnIO only from
+<a href=https://pawnio.eu/>pawnio.eu</a></li><li>be ready to approve administrator prompts for both installers</li><li>note that uninstalling ShoMetrics does not automatically uninstall PawnIO</li></ul><p>Ready to install? See
+<a href=../install-windows-helper/>How do I install the Windows helper?</a>.</p></div></article></main><footer class=site-footer><p>ShoMetrics is a Stream Deck plugin for clear system metrics.</p></footer></body></html>

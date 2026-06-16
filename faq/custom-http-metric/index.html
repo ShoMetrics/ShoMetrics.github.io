@@ -1,0 +1,81 @@
+<!doctype html><html lang=en-US><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="How a custom HTTP metric works."><title>Custom HTTP metrics | Sho Metrics</title><link rel=canonical href=https://shometrics.github.io/faq/custom-http-metric/><meta property="og:type" content="website"><meta property="og:site_name" content="Sho Metrics"><meta property="og:title" content="Custom HTTP metrics"><meta property="og:description" content="How a custom HTTP metric works."><meta property="og:url" content="https://shometrics.github.io/faq/custom-http-metric/"><meta property="og:image" content="https://shometrics.github.io/og-image.png"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="Custom HTTP metrics"><meta name=twitter:description content="How a custom HTTP metric works."><meta name=twitter:image content="https://shometrics.github.io/og-image.png"><link rel=icon href=../../favicon.ico sizes=32x32><link rel=icon href=../../favicon.svg type=image/svg+xml><link rel=apple-touch-icon href=../../apple-touch-icon.png><link rel=stylesheet href=../../css/site.css></head><body><a class=skip-link href=#main>Skip to content</a><header class=site-header><nav class=site-nav aria-label="Main navigation"><a class=brand href=../../ aria-label="ShoMetrics home"><img class="brand-mark mark-on-light" src=../../favicon.svg alt width=30 height=30>
+<img class="brand-mark mark-on-dark" src=../../logo-mark-dark.svg alt width=30 height=30>
+ShoMetrics
+</a><input class=nav-toggle type=checkbox id=nav-toggle>
+<label class=nav-burger for=nav-toggle aria-label="Toggle navigation menu"><svg class="icon-menu" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+<svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></label><div class=nav-links><a href=../../#start>Get started</a>
+<a href=https://github.com/ShoMetrics/sho_metrics target=_blank rel="noopener noreferrer">GitHub</a>
+<a href=../../faq/>FAQ</a></div></nav></header><main id=main><article class=page-shell><header class=page-header><p class=eyebrow>Sho Metrics</p><h1>Custom HTTP metrics</h1><p>How a custom HTTP metric works.</p></header><div class=page-content><p>A custom HTTP metric lets you point ShoMetrics at an HTTP endpoint that returns
+JSON, pull a value out of the response, and show it on a Stream Deck key like
+any other metric.</p><h2 id=who-this-is-for>Who this is for</h2><p>Most people won&rsquo;t need this — the built-in metrics already cover monitoring your
+own machine, from CPU, GPU, memory, disk and network to deeper hardware sensors.
+Custom HTTP is really for advanced users who are comfortable with a little
+technical setup. You might use it to show the weather, for example, or a reading
+from your <a href=https://www.home-assistant.io/>Home Assistant</a> setup.</p><blockquote><p>If what you&rsquo;re after is local hardware sensors through
+<a href=https://github.com/LibreHardwareMonitor/LibreHardwareMonitor>LibreHardwareMonitor</a>,
+it&rsquo;s worth knowing that although LHM can expose its readings as a JSON server
+you could point this feature at, we recommend the
+<a href=../helper/>Windows helper</a> instead — it&rsquo;s the path we build and tune
+specifically for reading LHM data.</p></blockquote><h2 id=how-it-works-in-a-nutshell>How it works, in a nutshell</h2><p>You give ShoMetrics a URL (and authentication, if the endpoint needs it), it
+fetches the JSON, and a <a href=https://jqlang.org/>jq</a> filter turns that JSON into the
+metric format ShoMetrics can display.</p><h2 id=step-by-step>Step by step</h2><h3 id=1-the-url>1. The URL</h3><p>This is where the endpoint URL goes. For now, only <code>GET</code> requests are supported.</p><blockquote><p>It&rsquo;s best not to put any credentials directly in the URL — it isn&rsquo;t a safe
+place for them. If your endpoint needs authentication, the Authentication
+section below is the place for it.</p></blockquote><h3 id=2-what-to-show>2. What to show</h3><p>In <strong>What to show</strong>, you can describe, in plain language, the value you&rsquo;d like to
+display — in other words, what you&rsquo;d like turned into a metric. This text is
+folded into the AI prompt (see <a href=#6-the-ai-prompt-optional>The AI prompt</a> below).</p><p>There&rsquo;s no need to put any secret here — credentials belong in the Authentication
+section, not in this text.</p><p>It&rsquo;s optional, and it isn&rsquo;t itself used to transform the data. That said, if
+you&rsquo;re planning to use the AI prompt, the more specific you can be, the better —
+ideally including a link to the endpoint&rsquo;s schema or API documentation.</p><ul><li><strong>Good:</strong> &ldquo;I&rsquo;d like to show today&rsquo;s temperature for Chiyoda, Tokyo, and please
+suggest a sensible maximum value for the display. API docs:
+<a href=https://open-meteo.com/en/docs%22>https://open-meteo.com/en/docs"</a></li><li><strong>Workable:</strong> &ldquo;Show today&rsquo;s temperature in Tokyo.&rdquo;</li><li><strong>Not so helpful:</strong> &ldquo;Show the weather.&rdquo; (No date, &ldquo;weather&rdquo; is generic, no
+mention of temperature versus wind speed, and no location.)</li></ul><p>If you don&rsquo;t need request settings or authentication, please feel free to skip
+ahead to <a href=#5-fetching-a-sample>Fetching a sample</a>.</p><h3 id=3-request-settings-optional>3. Request settings (optional)</h3><p>Here you can adjust a few extras, such as the timeout for each request and how
+many times it should retry.</p><blockquote><p>One thing worth keeping in mind: each ShoMetrics widget polls on its own
+schedule, every few seconds. If your total request time (timeout multiplied by
+retries) is longer than that polling interval, updates can start to fall behind
+the refresh rate — so it&rsquo;s a good idea to keep the total comfortably under it.</p></blockquote><h3 id=4-authentication-optional>4. Authentication (optional)</h3><p>If your endpoint needs authentication, you can set it up here.</p><blockquote><p><strong>Where your credentials are stored.</strong> They&rsquo;re stored in ShoMetrics global
+settings using Stream Deck&rsquo;s
+<a href=https://docs.elgato.com/streamdeck/sdk/guides/settings/>global settings API</a>,
+which Elgato recommends for user-provided API keys and access tokens. They
+aren&rsquo;t included when you export an action, and they remain local to this
+machine — so you&rsquo;ll set them up again on another machine.</p></blockquote><p>ShoMetrics supports a few methods:</p><ul><li><strong>None</strong> — the default, for open endpoints that don&rsquo;t need authentication.</li><li><strong>Basic</strong> — a username and password, sent as a standard <code>Authorization</code>
+header. This one&rsquo;s for endpoints behind HTTP Basic authentication, such as
+some local tools.</li><li><strong>Bearer token</strong> — a token sent as <code>Authorization: Bearer &lt;token></code>, common for
+modern APIs that issue an access token.</li><li><strong>API key in a header</strong> — you name the header (for example <code>X-API-Key</code>) and
+provide its value. This is for APIs that expect their key in a custom header.</li><li><strong>API key in the query string</strong> — you name the parameter (for example
+<code>api_key</code>) and provide its value. ShoMetrics adds it to the request when it
+fetches, so the token is never written into the URL field you typed.</li></ul><h4 id=authentication-is-shared>Authentication is shared</h4><p>A credential is a named credential, stored once in global settings; each widget
+just keeps a reference to it. So a credential is shared rather than tied to a
+single key:</p><ul><li>once you&rsquo;ve created it, you can reuse the same credential across widgets;</li><li>if you edit it, every widget that shares it is updated;</li><li>if you delete it, the credential itself is removed, and any widget still using
+it will show a &ldquo;missing credential&rdquo; state until you pick another credential or
+switch to no authentication.</li></ul><h4 id=removing-a-credential>Removing a credential</h4><p>Any Custom HTTP editor lists your saved credentials, so you can open any action
+— it doesn&rsquo;t have to be one that currently uses the credential — and remove it
+from there. It&rsquo;s only worth remembering that removing a credential affects every
+widget that shares it.</p><h4 id=secrets-are-hidden-once-saved>Secrets are hidden once saved</h4><p>After you save a secret, it&rsquo;s no longer shown back to you in the interface. This
+is so it can&rsquo;t be leaked by accident — for instance, if you happen to open this
+panel while streaming. If you&rsquo;d like to change it, you can simply overwrite it
+with a new value.</p><h3 id=5-fetching-a-sample>5. Fetching a sample</h3><p>When you&rsquo;re ready, the <strong>Fetch Sample</strong> button fetches your first response. If it
+doesn&rsquo;t work, the interface will explain what went wrong; and if the button is
+disabled, the reason is shown right next to it.</p><p>If you&rsquo;re already comfortable with <a href=https://jqlang.org/>jq</a>, you can head
+straight to <a href=#7-the-jq-filter>The jq filter</a>. Otherwise, the AI prompt is the
+next step.</p><h3 id=6-the-ai-prompt-optional>6. The AI prompt (optional)</h3><p>If you&rsquo;d rather not write jq yourself, ShoMetrics prepares a prompt you can copy
+into your favorite AI chatbot and have it write the jq for you. The <strong>Copy
+Prompt</strong> button is there for this.</p><blockquote><p>Please keep in mind that ShoMetrics doesn&rsquo;t talk to the AI for you, and it
+won&rsquo;t run whatever the AI replies with. Once the chatbot gives you a jq filter,
+you&rsquo;ll bring it back to ShoMetrics yourself and run it with <strong>Test Transform</strong>.
+You stay in control of what gets copied and run.</p></blockquote><blockquote><p>The prompt includes your request URL, a sample of the JSON response, and your
+<strong>What to show</strong> text. It does <strong>not</strong> include the secret you set in the
+Authentication section, and we redact what we can — but it&rsquo;s worth a quick look
+for anything sensitive before you paste it into an external service.
+ShoMetrics can&rsquo;t be responsible for information you choose to share externally.</p></blockquote><p>Once you&rsquo;ve pasted the prompt, a few things might happen:</p><ul><li>The chatbot gives you a final jq filter — you run it with <strong>Test Transform</strong>,
+and you get a working result.</li><li>It gives you a filter that fails when you run it — you can copy the failure
+debug details back to the chatbot so it can fix the filter.</li><li>It doesn&rsquo;t give you a filter yet, but tells you what to do next — you can
+follow along from there.</li><li>It needs a little more information and offers an exploratory jq filter — you
+run that, then paste the <strong>Exploration Output</strong> back so it can write the final
+filter.</li></ul><h3 id=7-the-jq-filter>7. The jq filter</h3><p>As mentioned above, <a href=https://jqlang.org/>jq</a> is the step that turns arbitrary
+JSON from the web into the format ShoMetrics understands. Different APIs return
+different JSON shapes, and jq is what reshapes any of them into a single
+ShoMetrics metric.</p><blockquote><p><strong>Why jq, rather than custom JavaScript?</strong> We&rsquo;ve deliberately chosen not to let
+the transform run arbitrary code — running arbitrary code inside the plugin is
+a risk we&rsquo;d rather not take on. jq is a focused query language for JSON, which
+is plenty for reshaping a response into a metric, without that exposure.</p></blockquote></div></article></main><footer class=site-footer><p>ShoMetrics is a Stream Deck plugin for clear system metrics.</p></footer></body></html>

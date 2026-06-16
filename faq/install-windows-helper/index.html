@@ -1,0 +1,25 @@
+<!doctype html><html lang=en-US><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Install the optional Windows helper for deeper ShoMetrics hardware sensors."><title>How do I install the Windows helper? | Sho Metrics</title><link rel=canonical href=https://shometrics.github.io/faq/install-windows-helper/><meta property="og:type" content="website"><meta property="og:site_name" content="Sho Metrics"><meta property="og:title" content="How do I install the Windows helper?"><meta property="og:description" content="Install the optional Windows helper for deeper ShoMetrics hardware sensors."><meta property="og:url" content="https://shometrics.github.io/faq/install-windows-helper/"><meta property="og:image" content="https://shometrics.github.io/og-image.png"><meta property="og:locale" content="en_US"><meta name=twitter:card content="summary_large_image"><meta name=twitter:title content="How do I install the Windows helper?"><meta name=twitter:description content="Install the optional Windows helper for deeper ShoMetrics hardware sensors."><meta name=twitter:image content="https://shometrics.github.io/og-image.png"><link rel=icon href=../../favicon.ico sizes=32x32><link rel=icon href=../../favicon.svg type=image/svg+xml><link rel=apple-touch-icon href=../../apple-touch-icon.png><link rel=stylesheet href=../../css/site.css></head><body><a class=skip-link href=#main>Skip to content</a><header class=site-header><nav class=site-nav aria-label="Main navigation"><a class=brand href=../../ aria-label="ShoMetrics home"><img class="brand-mark mark-on-light" src=../../favicon.svg alt width=30 height=30>
+<img class="brand-mark mark-on-dark" src=../../logo-mark-dark.svg alt width=30 height=30>
+ShoMetrics
+</a><input class=nav-toggle type=checkbox id=nav-toggle>
+<label class=nav-burger for=nav-toggle aria-label="Toggle navigation menu"><svg class="icon-menu" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+<svg class="icon-close" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></label><div class=nav-links><a href=../../#start>Get started</a>
+<a href=https://github.com/ShoMetrics/sho_metrics target=_blank rel="noopener noreferrer">GitHub</a>
+<a href=../../faq/>FAQ</a></div></nav></header><main id=main><article class=page-shell><header class=page-header><p class=eyebrow>Sho Metrics</p><h1>How do I install the Windows helper?</h1><p>Install the optional Windows helper for deeper ShoMetrics hardware sensors.</p></header><div class=page-content><p>Install the helper only if you want deeper hardware sensors. If you are not
+sure, install the Stream Deck plugin first and come back later. Before
+continuing, read <a href=../helper/>About the Windows helper</a> for what gets
+installed and what the PawnIO driver does.</p><h2 id=install-steps>Install steps</h2><ol><li>Install ShoMetrics in the Stream Deck app.</li><li>Download the Windows helper installer from the
+<a href=../../download/>download page</a>, run it, and approve the Windows
+administrator prompt.</li><li>If you want sensors that need driver access, install
+<a href=https://pawnio.eu/>PawnIO</a> yourself from pawnio.eu. The helper does not
+install PawnIO for you. Skip this step if you do not want deeper sensors.</li><li>Restart Stream Deck if a ShoMetrics key does not pick up helper data right
+away.</li></ol><p>After installation, open the ShoMetrics control panel to confirm the helper
+service is running and, if you installed it, that the PawnIO driver is
+detected.</p><h2 id=if-the-helper-does-not-work>If the helper does not work</h2><p>Open the ShoMetrics control panel first. It reports whether the helper service
+is running, the helper connection state, and the PawnIO driver status — most
+issues are visible there.</p><p>If the panel shows the helper running but a specific metric is still empty,
+your machine may not expose that sensor. The helper can only show what your
+hardware, drivers, and LibreHardwareMonitor can read.</p><p>When reporting helper issues, include the helper version, plugin version,
+source protocol version, and any gRPC status shown by the control panel or
+Stream Deck logs. The helper and plugin can be different versions if only one
+of them was updated.</p></div></article></main><footer class=site-footer><p>ShoMetrics is a Stream Deck plugin for clear system metrics.</p></footer></body></html>
