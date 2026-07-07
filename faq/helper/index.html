@@ -17,7 +17,7 @@ your first setup.</p><h2 id=why-a-driver-is-involved>Why a driver is involved</h
 Reading them requires a kernel driver. Many Windows system tools use drivers for
 similar reasons, including antivirus tools, game anti-cheat systems, RGB and
 fan-control utilities, and hardware-monitoring apps.</p><p>Installing any driver is still something to do deliberately. The rest of this
-page explains what gets installed and what each part does.</p><h2 id=what-gets-installed>What gets installed</h2><p>The helper sensor stack has two pieces:</p><ul><li>the ShoMetrics Windows helper, a user-mode local service</li><li>the third-party <a href=https://pawnio.eu/>PawnIO</a> driver, used by
+page explains what gets installed and what each part does.</p><h2 id=what-gets-installed>What gets installed</h2><p>The helper sensor stack has two pieces:</p><ul><li>the ShoMetrics Windows helper, a local Windows service that runs in the background</li><li>the third-party <a href=https://pawnio.eu/>PawnIO</a> driver, used by
 <a href=https://github.com/LibreHardwareMonitor/LibreHardwareMonitor>LibreHardwareMonitor</a>
 inside the helper for low-level sensor access</li></ul><p>ShoMetrics does not require you to install LibreHardwareMonitor separately —
 the helper uses the library directly.</p><p><strong>If you do not already have PawnIO installed, the helper installer installs it
